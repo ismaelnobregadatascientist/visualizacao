@@ -1,0 +1,137 @@
+<html>
+  <head>
+	<meta charset="utf-8">
+	<title>Casos de AIDS por Estado</title>
+	<script src="https://d3js.org/d3.v5.min.js"></script>
+  </head>
+  <body>
+
+  <button onClick="eventoClique()">Clique</button>
+  <svg width="500" height="500">    
+  </svg> 
+
+	<script type="text/javascript">
+
+    function eventoClique(){
+        
+            // join - D3 v5
+            /*
+            d3.select("svg").selectAll("circle")
+            .data(meusdados)
+            .join("circle")
+            .attr("cx", d=>d[0])
+            .attr("cy", d=>d[1]);
+
+            d3.select("svg").selectAll("text")
+            .data(meusdados)
+            .join("text")
+            .attr("x", d=>d[0])
+            .attr("y", d=>d[1])
+            .text(d=>d);
+            */
+        
+            //update pontos
+            d3.select("svg").selectAll("circle")
+            .data(meusdados)
+            .transition()
+            // Delay de 0.5 segundos
+            .delay(500)
+            .attr("cx", d=>d[0])
+            .attr("cy", d=>d[1])
+            .attr("fill","blue");
+
+            //update textos
+            d3.select("svg").selectAll("text")
+            .data(meusdados)
+            .text(d=>d)
+            .transition()
+            .delay(500)
+            .attr("x", d=>d[0])
+            .attr("y", d=>d[1]);
+        
+            // remove pontos
+            d3.select("svg").selectAll("circle")
+            .data(meusdados)
+            .exit()
+            .remove()
+
+            // remove texto
+            d3.select("svg").selectAll("text")
+            .data(meusdados)
+            .exit()
+            .remove()
+
+        }
+
+        d3.csv("https://raw.githubusercontent.com/andrevcmelo/test/master/aids.csv")
+        .then(function(data) {
+            //process data
+
+            // var meusdados = [[15,17],[90,480],[50,250]];
+            var meusdados = [];
+            console.log(data.length);
+
+            for (var i = 0 ; i < data.length; ++i){
+                var item = data[i];
+              
+               var entrada = [+item["1990"],+item["2009"],i];
+                meusdados.push(entrada);
+            }
+
+            console.log(meusdados);
+
+        var margin = {top: 15, right: 60, bottom: 15, left:15};
+        var width = 500 - margin.left - margin.right;
+        var height = 500 - margin.top - margin.bottom;
+
+
+        //var escalaX = d3.scaleLinear().domain([5,5500]).range([0,500]);
+        //var escalaY = d3.scaleLinear().domain([12,95]).range([0,500]);
+        var rangeX = d3.extent(meusdados,d=>d[0]);
+        var escalaX = d3.scaleLinear().domain(rangeX).range([0,width]);
+
+        var rangeY = d3.extent(meusdados,d=>d[1]);
+        var escalaY = d3.scaleLinear().domain(rangeY).range([height,0]);
+
+        var rangeZ = d3.extent(meusdados,d=>d[2]);
+        var escalaC = d3.scaleLinear().domain(rangeZ).range(["gray","blue"]);
+ 
+        var mySVG = d3.select("svg")
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      
+        mySVG.selectAll("circle")
+        .data(meusdados)
+        .enter()
+        .append("circle")
+        .attr("cx",d=>escalaX(d[0]))
+        .attr("cy",d=>escalaY(d[1]))
+        .attr("fill",d=>escalaC(d[2]))
+        .attr("r",5);
+
+        mySVG.selectAll("text").data(meusdados).enter().append("text")
+        .attr("x", d=>escalaX(d[0]))
+        .attr("y", d=>escalaY(d[1]))
+        .text((d,i)=>data[i]["UF"]).attr("fill","red");
+        //.attr("x",d=>d[0]).attr("y",d=>d[1]).text(d=>d).attr("fill","red");
+
+        // Plotar o eixo X
+        var eixoX = d3.axisBottom(escalaX);
+        var grupoDoEixoX = mySVG.append("g").attr("transform","translate(0,250)");
+        grupoDoEixoX.call(eixoX);
+
+        grupoDoEixoX.select(".domain").attr("stroke","blue");
+
+        // Plotar o eixo Y
+        var eixoY = d3.axisLeft(escalaY);
+        var grupoDoEixoY = mySVG.append("g").attr("transform","translate(30,0)");
+        grupoDoEixoY.call(eixoY);
+
+    }).catch(function(error){
+                //handle error
+    });
+
+	</script>
+  </body>
+
+</html>
